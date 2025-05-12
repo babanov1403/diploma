@@ -91,14 +91,27 @@ void TestStack() {
 
 void TestAdaptive() {
     Solver solver;
+    // // bad example
+    // Matrix matrix_c = {2, 1};
+    // matrix_c = matrix_c.GetTransposed();
+    // Matrix matrix_a = {{1,2}, {-1, 1}};
+    // Matrix matrix_lb = Matrix{2, -2}.GetTransposed();
+    // Matrix matrix_ub = Matrix{6, -1}.GetTransposed();
+    // Matrix matrix_ld = Matrix{1, 0}.GetTransposed();
+    // Matrix matrix_ud = Matrix{3, 2}.GetTransposed();
+    
+    // auto sol = solver.SolveAdaptive(matrix_c, matrix_a, matrix_lb, matrix_ub, matrix_ld, matrix_ud);
+    // std::cout << "solution is:\n";
+    // std::cout << sol;
+
     // bad example
-    Matrix matrix_c = {2, 1};
+    Matrix matrix_c = {1, 1};
     matrix_c = matrix_c.GetTransposed();
-    Matrix matrix_a = {{3, 5,}, {1, 1}};
-    Matrix matrix_lb = Matrix{-5, 0}.GetTransposed();
-    Matrix matrix_ub = Matrix{10, 3}.GetTransposed();
-    Matrix matrix_ld = Matrix{0, 0}.GetTransposed();
-    Matrix matrix_ud = Matrix{2, 4}.GetTransposed();
+    Matrix matrix_a = {{2,2}, {2, 1}};
+    Matrix matrix_lb = Matrix{2, 1}.GetTransposed();
+    Matrix matrix_ub = Matrix{2, 1}.GetTransposed();
+    Matrix matrix_ld = Matrix{-1.5, 0}.GetTransposed();
+    Matrix matrix_ud = Matrix{3, 4}.GetTransposed();
     
     auto sol = solver.SolveAdaptive(matrix_c, matrix_a, matrix_lb, matrix_ub, matrix_ld, matrix_ud);
     std::cout << "solution is:\n";

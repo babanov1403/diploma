@@ -34,21 +34,6 @@ class Solver {
     enum class INDEX_TYPE_PLAN { BASIS_J, BASIS_I_INV };
     enum class INDEX_TYPE_PLAN_2 { BASIS_J_INV, BASIS_I };
 public:
-    struct ReturnType {
-        int idx;
-        INDEX_TYPE type;
-    };
-
-    struct Index {
-        int idx;
-        INDEX_TYPE_PLAN type;
-    };
-
-    struct Index2 {
-        int idx;
-        INDEX_TYPE_PLAN_2 type;
-    };
-
     Solver();
     void SolveRegular(alglib::minlpstate &state, alglib::minlpreport &rep, alglib::real_1d_array &x, Transformer* transformer);
     auto SolveAdaptive(const Matrix& matrix_c, const Matrix& matrix_a, const Matrix& matrix_lb, const Matrix& matrix_ub
@@ -68,17 +53,17 @@ public:
         // TODO: rofls
         x = Matrix{{2, 1}};
         x = x.GetTransposed();
-        std::set<int> basis_i; // from 0 to matrix_a.GetRows() - 1
-        std::set<int> basis_j; // from 0 to matrix_a.GetColumns() - 1
+        std::vector<int> basis_i; // from 0 to matrix_a.GetRows() - 1
+        std::vector<int> basis_j; // from 0 to matrix_a.GetColumns() - 1
 
-        std::set<int> basis_i_residual;
+        std::vector<int> basis_i_residual;
         for (int idx = 0; idx < matrix_a.GetRows(); idx++) {
-            basis_i_residual.insert(idx);
+            basis_i_residual.emplace_back(idx);
         }
 
-        std::set<int> basis_j_residual;
+        std::vector<int> basis_j_residual;
         for (int idx = 0; idx < matrix_a.GetColumns(); idx++) {
-            basis_j_residual.insert(idx);
+            basis_j_residual.emplace_back(idx);
         }
 
         int iter = 0;

@@ -329,9 +329,20 @@ Matrix Matrix::GetSubMatrix(const std::unordered_set<int>& iv, const std::unorde
     return GetSubMatrix(std::move(iv_v), std::move(jv_v));
 }
 
+Matrix Matrix::GetSubMatrix(const std::set<int>& iv, const std::set<int>& jv) const {
+    return GetSubMatrix(std::vector(iv.begin(), iv.end()), std::vector(jv.begin(), jv.end()));
+}
+
 Matrix Matrix::Stack(const Matrix& first, const Matrix& second) {
     if (first.GetColumns() != second.GetColumns()) {
         throw std::logic_error("size of matrix does not match while stacking\n");
+    }
+
+    if (first.GetRows() == 0) {
+        return second;
+    }
+    if (second.GetRows() == 0) {
+        return first;
     }
 
     Matrix result(first.GetRows() + second.GetRows(), first.GetColumns(), 0);

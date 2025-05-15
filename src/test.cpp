@@ -105,13 +105,13 @@ void TestAdaptive() {
     // std::cout << sol;
 
     // bad example
-    Matrix matrix_c = {1, 1};
+    Matrix matrix_c = {2, 3};
     matrix_c = matrix_c.GetTransposed();
-    Matrix matrix_a = {{2,2}, {2, 1}};
-    Matrix matrix_lb = Matrix{2, 1}.GetTransposed();
-    Matrix matrix_ub = Matrix{2, 1}.GetTransposed();
-    Matrix matrix_ld = Matrix{-1.5, 0}.GetTransposed();
-    Matrix matrix_ud = Matrix{3, 4}.GetTransposed();
+    Matrix matrix_a = {{2,5}, {1, 1}};
+    Matrix matrix_lb = Matrix{10, 3}.GetTransposed();
+    Matrix matrix_ub = Matrix{10, 3}.GetTransposed();
+    Matrix matrix_ld = Matrix{0, 0}.GetTransposed();
+    Matrix matrix_ud = Matrix{10, 10}.GetTransposed();
     
     auto sol = solver.SolveAdaptive(matrix_c, matrix_a, matrix_lb, matrix_ub, matrix_ld, matrix_ud);
     std::cout << "solution is:\n";

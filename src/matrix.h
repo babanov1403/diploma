@@ -4,6 +4,7 @@
 #include <iomanip>
 #include <iostream>
 #include <vector>
+#include <set>
 #include <unordered_set>
 
 #include "utils.h"
@@ -50,6 +51,7 @@ public:
     size_t GetColumns() const;
     Matrix GetSubMatrix(const std::vector<int>&, const std::vector<int>&) const;
     Matrix GetSubMatrix(const std::unordered_set<int>&, const std::unordered_set<int>&) const;
+    Matrix GetSubMatrix(const std::set<int>& iv, const std::set<int>& jv) const;
 
     static Matrix Stack(const Matrix& first, const Matrix& second);
 

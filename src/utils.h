@@ -2,6 +2,9 @@
 
 #include <cmath>
 #include <unordered_set>
+#include <set>
+#include <vector>
+#include <algorithm>
 
 constexpr double kTolerance = 1e-9;
 

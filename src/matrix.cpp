@@ -68,7 +68,7 @@ const std::vector<double>& Matrix::operator[](int idx) const {
     return vector_[idx];
 }
 
-Matrix Matrix::operator*(double val) {
+Matrix Matrix::operator*(double val) const {
     Matrix result = *this;
     for (auto& row : result.vector_) {
         for (auto& element : row) {
@@ -78,7 +78,7 @@ Matrix Matrix::operator*(double val) {
     return result;
 }
 
-Matrix Matrix::operator/(double val) {
+Matrix Matrix::operator/(double val) const {
     Matrix result = *this;
     return result * (1. / val);
 }
@@ -305,13 +305,33 @@ size_t Matrix::GetColumns() const {
     return columns_;
 }
 
+void Matrix::UpdateMatrix(Matrix&& modified, const std::vector<int>& row_idxes, const std::vector<int>& col_idxes) {
+    for (int idx = 0; idx < row_idxes.size(); idx++) {
+        for (int jdx = 0; jdx < col_idxes.size(); jdx++) {
+            vector_[row_idxes[idx]][col_idxes[jdx]] = modified(idx, jdx);
+        }
+    }
+}
+
+Matrix Matrix::GetSubMatrixByRow(const std::vector<int>& idxes) const {
+    std::vector<int> iota(columns_);
+    std::ranges::iota(iota, 0);
+    return GetSubMatrix(idxes, iota);
+}
+
+Matrix Matrix::GetSubMatrixByColumn(const std::vector<int>& idxes) const {
+    std::vector<int> iota(rows_);
+    std::ranges::iota(iota, 0);
+    return GetSubMatrix(iota, idxes);
+}
+
 // maybe i should do some sort of MatrixView, we'll see
-Matrix Matrix::GetSubMatrix(const std::vector<int>& iv, const std::vector<int>& jv) const {
-    Matrix result(iv.size(), jv.size(), 0);
+Matrix Matrix::GetSubMatrix(const std::vector<int>& idxes, const std::vector<int>& jdxes) const {
+    Matrix result(idxes.size(), jdxes.size(), 0);
     int res_idx = 0;
     int res_jdx = 0;
-    for (auto idx : iv) {
-        for (auto jdx : jv) {
+    for (auto idx : idxes) {
+        for (auto jdx : jdxes) {
             result(res_idx, res_jdx) = vector_[idx][jdx];
             ++res_jdx;
         }
@@ -319,18 +339,6 @@ Matrix Matrix::GetSubMatrix(const std::vector<int>& iv, const std::vector<int>& 
         res_jdx = 0;
     }
     return result;
-}
-
-Matrix Matrix::GetSubMatrix(const std::unordered_set<int>& iv, const std::unordered_set<int>& jv) const {
-    std::vector<int> iv_v(iv.begin(), iv.end());
-    std::vector<int> jv_v(jv.begin(), jv.end());
-    std::ranges::sort(iv_v);
-    std::ranges::sort(jv_v);
-    return GetSubMatrix(std::move(iv_v), std::move(jv_v));
-}
-
-Matrix Matrix::GetSubMatrix(const std::set<int>& iv, const std::set<int>& jv) const {
-    return GetSubMatrix(std::vector(iv.begin(), iv.end()), std::vector(jv.begin(), jv.end()));
 }
 
 Matrix Matrix::Stack(const Matrix& first, const Matrix& second) {
@@ -446,4 +454,8 @@ std::ostream& operator<<(std::ostream& os, const PolynomMatrix& poly) {
         os << suffix << '\n';
     }
     return os;
+}
+
+Matrix operator*(double val, const Matrix& matrix) {
+    return matrix * val;
 }

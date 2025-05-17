@@ -6,6 +6,7 @@
 #include <vector>
 #include <set>
 #include <unordered_set>
+#include <numeric>
 
 #include "utils.h"
 
@@ -16,9 +17,9 @@ public:
     Matrix(const std::vector<double>& vector);
     Matrix(const std::initializer_list<std::initializer_list<double>>& init);
     Matrix(const std::initializer_list<double>& init);
-    Matrix(size_t rows, size_t columns);
-    Matrix(size_t rows);
-    Matrix(size_t rows, size_t columns, double val);
+    explicit Matrix(size_t rows, size_t columns);
+    explicit Matrix(size_t rows);
+    explicit Matrix(size_t rows, size_t columns, double val);
     Matrix(const Matrix& a);
     Matrix(Matrix&& other);
 
@@ -27,8 +28,8 @@ public:
     std::vector<double>& operator[](int idx);
     const std::vector<double>& operator[](int idx) const;
 
-    Matrix operator*(double val);
-    Matrix operator/(double val);
+    Matrix operator*(double val) const;
+    Matrix operator/(double val) const;
     Matrix operator+(const Matrix& other) const;
     Matrix operator-(const Matrix& other) const;
     Matrix operator*(const Matrix& other) const;
@@ -49,11 +50,11 @@ public:
     size_t GetRows() const;
     size_t GetColumns() const;
     
-    void UpdateMatrix();
+    void UpdateMatrix(Matrix&&, const std::vector<int>&, const std::vector<int>&);
 
+    Matrix GetSubMatrixByRow(const std::vector<int>&) const;
+    Matrix GetSubMatrixByColumn(const std::vector<int>&) const;
     Matrix GetSubMatrix(const std::vector<int>&, const std::vector<int>&) const;
-    Matrix GetSubMatrix(const std::unordered_set<int>&, const std::unordered_set<int>&) const;
-    Matrix GetSubMatrix(const std::set<int>& iv, const std::set<int>& jv) const;
 
     static Matrix Stack(const Matrix& first, const Matrix& second);
 
@@ -63,6 +64,7 @@ public:
 
     friend std::ostream& operator<<(std::ostream&, const Matrix&);
     friend class PolynomMatrix;
+    friend Matrix operator*(double val, const Matrix& matrix);
 
 private:
     std::vector<std::vector<double>> vector_;

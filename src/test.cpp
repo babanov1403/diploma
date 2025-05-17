@@ -45,6 +45,9 @@ void TestAll() {
         TestStack();
         std::cout << "stack passed!\n";
     }
+    {
+        TestUpdateMatrix();
+    }
 }
 
 void TestLinearSystemSolve() {
@@ -76,7 +79,21 @@ void TestSubMatrix() {
     REQUIRE_EQUAL(A.GetSubMatrix(std::vector{1, 2}, {1, 2}), res);
     res = Matrix({-1, 3, 2});
     REQUIRE_EQUAL(A.GetSubMatrix(std::vector{0}, {1, 2, 3}), res);
-    REQUIRE_EQUAL(A.GetSubMatrix(std::unordered_set{0, 1, 2, 3}, {0, 1, 2, 3}), A);
+    REQUIRE_EQUAL(A.GetSubMatrix(std::vector{0, 1, 2, 3}, {0, 1, 2, 3}), A);
+}
+
+void TestUpdateMatrix() {
+    Matrix A = {{2, -1, 3, 2},
+                {2, 3, 3, 2},
+                {3, -1, -1, 2},
+                {3, -1, 3, -1}};
+    auto sub = A.GetSubMatrix(std::vector{1, 3}, {1, 3});
+    sub(0, 1) = 100;
+    sub(1, 0) = 200;
+    auto copy_sub = sub;
+    A.UpdateMatrix(std::move(sub), std::vector{1, 3}, {1, 3});
+    REQUIRE_EQUAL(A.GetSubMatrix({1, 3}, {1, 3}), copy_sub);
+
 }
 
 void TestStack() {
@@ -91,7 +108,7 @@ void TestStack() {
 
 void TestAdaptive() {
     Solver solver;
-    // // bad example
+    // // // bad example
     // Matrix matrix_c = {2, 1};
     // matrix_c = matrix_c.GetTransposed();
     // Matrix matrix_a = {{1,2}, {-1, 1}};
@@ -105,13 +122,26 @@ void TestAdaptive() {
     // std::cout << sol;
 
     // bad example
-    Matrix matrix_c = {2, 3};
+    // Matrix matrix_c = {2, 3};
+    // matrix_c = matrix_c.GetTransposed();
+    // Matrix matrix_a = {{2,5}, {1, 1}};
+    // Matrix matrix_lb = Matrix{10, 3}.GetTransposed();
+    // Matrix matrix_ub = Matrix{10, 3}.GetTransposed();
+    // Matrix matrix_ld = Matrix{0, 0}.GetTransposed();
+    // Matrix matrix_ud = Matrix{10, 10}.GetTransposed();
+    
+    // auto sol = solver.SolveAdaptive(matrix_c, matrix_a, matrix_lb, matrix_ub, matrix_ld, matrix_ud);
+    // std::cout << "solution is:\n";
+    // std::cout << sol;
+
+    // // bad example
+    Matrix matrix_c = {3, -2};
     matrix_c = matrix_c.GetTransposed();
-    Matrix matrix_a = {{2,5}, {1, 1}};
-    Matrix matrix_lb = Matrix{10, 3}.GetTransposed();
-    Matrix matrix_ub = Matrix{10, 3}.GetTransposed();
+    Matrix matrix_a = {{7,2}, {5, 6}, {3, 8}};
+    Matrix matrix_lb = Matrix{14, 0, 24}.GetTransposed();
+    Matrix matrix_ub = Matrix{100, 30, 100}.GetTransposed();
     Matrix matrix_ld = Matrix{0, 0}.GetTransposed();
-    Matrix matrix_ud = Matrix{10, 10}.GetTransposed();
+    Matrix matrix_ud = Matrix{5, 5}.GetTransposed();
     
     auto sol = solver.SolveAdaptive(matrix_c, matrix_a, matrix_lb, matrix_ub, matrix_ld, matrix_ud);
     std::cout << "solution is:\n";

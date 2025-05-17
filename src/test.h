@@ -9,5 +9,6 @@ void TestAll();
 void TestLinearSystemSolve();
 void TestInversion();
 void TestSubMatrix();
+void TestUpdateMatrix();
 void TestStack();
 void TestAdaptive();

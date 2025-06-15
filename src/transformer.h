@@ -5,11 +5,11 @@
 #include <fstream>
 #include <ranges>
 
-
 #include "integration_utils.h"
 #include "matrix.h"
 #include "polynom.h"
 #include "utils.h"
+#include <omp.h>
 /*
     takes input matrices, computes output matrices for
     linear programming task
@@ -29,8 +29,7 @@ public:
     Matrix ComputeD(double left_t, double right_t, size_t interval_cnt);
 
     // x(Tk+1) = Y(Tk+1)*Y^-1(Xk)*x0 + Y(Tk+1) * integrale(xk -> xk+1, Y^-1(t)*b dt)
-    Matrix ComputePathWithGivenU(const std::vector<double>& u_vec,
-                                 std::filesystem::path path = "");
+    Matrix ComputePathWithGivenU(const std::vector<double>& u_vec, std::filesystem::path path = "");
 
     // hardcode all input params right here
     void Initialize();
@@ -55,6 +54,7 @@ private:
 
     Matrix matrix_a_;
     Matrix matrix_c_;
+    Matrix matrix_c_u_;
     Matrix matrix_h_;
     Matrix matrix_g_;
     Matrix matrix_b_;

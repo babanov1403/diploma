@@ -22,9 +22,8 @@ set(ALL_SRC_FILES ${SRC_FILES} ${ALGLIB_SRC_FILES})
 add_executable(${PROJECT_NAME} ${ALL_SRC_FILES})
 
 # (Optional) Additional compiler flags
-target_compile_options(${PROJECT_NAME} PRIVATE
-    -std=c++23 -Wvolatile -g -march=native
-)
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++23 -fopenmp -Wvolatile -O3 -march=native")
 
 # (Optional) For debugging
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")

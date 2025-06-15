@@ -1,5 +1,4 @@
 #include "integration_utils.h"
-
 PolynomMatrix GetExponentPolynom(const Matrix& matrix) {
     Matrix init(matrix.GetRows());
     PolynomMatrix result(kRowPolySize);
@@ -12,12 +11,10 @@ PolynomMatrix GetExponentPolynom(const Matrix& matrix) {
     }
     return result;
 }
-
 double ComputeMoment(int degree, double left, double right) {
     return ComputePower(right, degree + 1) / (degree + 1) -
            ComputePower(left, degree + 1) / (degree + 1);
 }
-
 std::vector<double> MakeNodes(int number, double left, double right) {
     std::vector<double> nodes(number + 1);
     double h = (right - left) / number;

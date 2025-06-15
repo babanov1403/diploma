@@ -1,5 +1,4 @@
 #include "utils.h"
-
 double ComputePower(double val, int power) {
     double res = 1;
     while (power > 0) {
@@ -11,13 +10,12 @@ double ComputePower(double val, int power) {
     }
     return res;
 }
-
 bool EqualNotStrict(double lhs, double rhs) {
     return std::abs(rhs - lhs) <= kTolerance;
 }
-
 template <class T>
-std::unordered_set<T> Perece4eniye(const std::unordered_set<T>& lhs, const std::unordered_set<T>& rhs) {
+std::unordered_set<T> Perece4eniye(const std::unordered_set<T>& lhs,
+                                   const std::unordered_set<T>& rhs) {
     std::unordered_set<T> result;
     for (const auto& el : lhs) {
         if (rhs.contains(el)) {
@@ -26,9 +24,9 @@ std::unordered_set<T> Perece4eniye(const std::unordered_set<T>& lhs, const std::
     }
     return result;
 }
-
 template <class T>
-std::unordered_set<T> Obyedeneniye(const std::unordered_set<T>& lhs, const std::unordered_set<T>& rhs) {
+std::unordered_set<T> Obyedeneniye(const std::unordered_set<T>& lhs,
+                                   const std::unordered_set<T>& rhs) {
     std::unordered_set<T> result;
     for (const auto& el : lhs) {
         result.insert(el);

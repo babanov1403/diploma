@@ -3,9 +3,12 @@ import numpy as np
 kTolerance = .5
 
 def solve_adaptive(matrix_c : np.ndarray, matrix_a : np.ndarray, matrix_lb : np.ndarray,
-                   matrix_ub : np.ndarray, matrix_ld : np.ndarray, matrix_ud : np.ndarray):
+                   matrix_ub : np.ndarray, matrix_ld : np.ndarray, matrix_ud : np.ndarray, x = None):
+    if x is None:
+        x = (matrix_ld + matrix_ud) / 2
 
-    x = np.array([2, 2])
+    # x = np.array([6, 10, 9, 10, 9, 10, 10, 6, 2, 0])
+    # x = np.array([1, 2])
 
     basis_i = np.array([], dtype = np.int64)
     basis_j = np.array([], dtype = np.int64)
@@ -21,6 +24,7 @@ def solve_adaptive(matrix_c : np.ndarray, matrix_a : np.ndarray, matrix_lb : np.
     iter = 0
 
     while True:
+        print("================================")
         print("RUNNING ON ITERATION: ", iter)
         iter+=1
 
@@ -28,8 +32,8 @@ def solve_adaptive(matrix_c : np.ndarray, matrix_a : np.ndarray, matrix_lb : np.
         basis_j.sort()
         basis_i_residual.sort()
         basis_j_residual.sort()
-
-        print(basis_i, basis_i_residual, basis_j_residual, basis_j)
+        print("i", "i_res", "j", "j_res")
+        print(basis_i, basis_i_residual, basis_j, basis_j_residual)
 
         opora_dim = basis_i.shape[0]
 
@@ -75,7 +79,7 @@ def solve_adaptive(matrix_c : np.ndarray, matrix_a : np.ndarray, matrix_lb : np.
                 continue
             broken_idxes_j.append(idx)
 
-        if len(broken_idxes_i) + len(broken_idxes_j) == 0:
+        if len(broken_idxes_i) + len(broken_idxes_j) + 1 == 0:
             print("ret in optimum criterion")
             return x
 
@@ -85,7 +89,7 @@ def solve_adaptive(matrix_c : np.ndarray, matrix_a : np.ndarray, matrix_lb : np.
         # delta constits of whole J
 
         beta = 0
-        for jdx in range(delta.shape[0]):
+        for jdx in basis_j_residual:
             if delta[jdx] > 0:
                 beta += delta[jdx] * (x[jdx] - matrix_ld[jdx])
             else:
@@ -105,6 +109,9 @@ def solve_adaptive(matrix_c : np.ndarray, matrix_a : np.ndarray, matrix_lb : np.
 
         l = np.zeros(x.shape[0], dtype=np.float64)
 
+        print("delta:\n")
+        print(delta)
+
         for jdx in basis_j_residual:
             if delta[jdx] < 0:
                 l[jdx] = matrix_ud[jdx] - x[jdx]
@@ -123,11 +130,12 @@ def solve_adaptive(matrix_c : np.ndarray, matrix_a : np.ndarray, matrix_lb : np.
             else:
                 omega[idx] = 0
         if opora_dim > 0:
-            l[basis_j] = a_op_inv @ omega[basis_j] - a_op_inv @ matrix_a[basis_i, :][:, basis_j_residual] @ l[basis_j_residual]
+            print(omega)
+            l[basis_j] = a_op_inv @ omega[basis_i] - a_op_inv @ matrix_a[basis_i, :][:, basis_j_residual] @ l[basis_j_residual]
 
         # STEP 5: computing theta!!!
 
-        theta = 1e8
+        theta = 1
         bad_index = -1
         bad_index_type = -1 # 0 - from basis_j, 1 - from basis_i_residual
 
@@ -188,15 +196,14 @@ def solve_adaptive(matrix_c : np.ndarray, matrix_a : np.ndarray, matrix_lb : np.
         print("theta:", theta)
         print(theta_i, theta_j)
 
-        last_x = x.copy()
         x = x + theta * l
         beta_bar = (1 - theta) * beta
 
         print("beta_bar:", beta_bar)
 
-        # if beta_bar <= kTolerance:
-        #     print("ret in second beta check")
-        #     return x
+        if beta_bar <= kTolerance:
+            print("ret in second beta check")
+            return x
 
         # STEP 7: compute ksi and alpha
 
@@ -211,34 +218,37 @@ def solve_adaptive(matrix_c : np.ndarray, matrix_a : np.ndarray, matrix_lb : np.
         print("bad index type:", bad_index, bad_index_type)
         # A = A(I, J)
         if bad_index_type == 0:
-            sign = 1 if x[bad_index] == matrix_ld[bad_index] else -1
+            sign = 1 if np.allclose(x[bad_index], matrix_ld[bad_index]) else -1
+            tmp_bad_index = np.where(basis_j == bad_index)[0]
             print(sign)
             if opora_dim > 0:
-                # i dont know
                 matrix_j_res[np.ix_(basis_i, basis_j_residual)] = a_op_inv @ matrix_a[basis_i, :][:, basis_j_residual]
                 matrix_i[np.ix_(basis_i, basis_j)] = -a_op_inv
-                ksi_j[basis_j_residual] = sign * matrix_j_res[bad_index, :]
-                ksi_i[basis_i] = sign * matrix_i[bad_index, :]
+                print(ksi_j[basis_j_residual])
+                print(matrix_j_res.shape)
+                print (matrix_j_res)
+                ksi_j[basis_j_residual] = sign * matrix_j_res[tmp_bad_index][0][basis_j_residual]
+                ksi_i[basis_i] = sign * matrix_i[tmp_bad_index][0][basis_i]
             print(matrix_j_res)
             if sign == 1:
                 alpha = x[bad_index] + l[bad_index] - matrix_ld[bad_index]
             else:
                 alpha = matrix_ud[bad_index] - x[bad_index] - l[bad_index]
         else:
-            sign = 1 if matrix_a[bad_index, :] @ x == matrix_ub[bad_index] else -1
+            sign = 1 if np.allclose(matrix_a[bad_index, :] @ x, matrix_ub[bad_index]) else -1
+            tmp_bad_index = np.where(basis_i_residual == bad_index)[0]
+            print(matrix_a[bad_index, :] @ x, matrix_ub[bad_index])
             if opora_dim > 0:
                 matrix_j_res[np.ix_(basis_i_residual, basis_j_residual)] = matrix_a[basis_i_residual, :][:, basis_j_residual] - matrix_a[basis_i_residual, :][:, basis_j] @ a_op_inv @ matrix_a[basis_i, :][:, basis_j_residual]
                 matrix_i[np.ix_(basis_i_residual, basis_j)] = matrix_a[basis_i_residual, :][:, basis_j] @ a_op_inv
                 ksi_j[basis_j_residual] = sign * matrix_j_res[bad_index][basis_j_residual]
-                print (matrix_i[bad_index])
-                print (ksi_i[basis_i])
-                # here!!!
                 ksi_i[basis_i] = sign * matrix_i[bad_index][basis_j]
             else:
                 matrix_j_res = matrix_a[basis_i_residual, :][:, basis_j_residual]
                 print(matrix_j_res)
                 print(matrix_j_res[bad_index])
-                ksi_j[basis_j_residual] = sign * matrix_j_res[bad_index, :]
+                print(bad_index)
+                ksi_j[basis_j_residual] = sign * matrix_j_res[bad_index, :][basis_j_residual]
             
             print(matrix_j_res)
             print(ksi_j)
@@ -328,7 +338,7 @@ def solve_adaptive(matrix_c : np.ndarray, matrix_a : np.ndarray, matrix_lb : np.
 
         if bad_index_2 == -1:
             print('bad_index_2:', bad_index_2)
-            return x
+            continue
 
         # bad_index_type : 0 - from J_op, 1 - from I_n
         # bad_index_type_2 : 0 p from J_n, 1 - from I_op 
@@ -378,19 +388,45 @@ if __name__ == "__main__":
     # print("solution is\n")
     # print(solution)
 
-    matrix_c = np.array([3, -2])
+    matrix_c = np.array([2, 5, 0, 0, 0])
     matrix_c = matrix_c.transpose()
     
-    matrix_a = np.array([[7, 2], [5, 6], [3, 8]])
-    matrix_lb = np.array([14, 0, 24]).transpose()
-    matrix_ub = np.array([100, 30, 100]).transpose()
-    matrix_ld = np.array([0, 0]).transpose()
-    matrix_ud = np.array([5, 5]).transpose()
+    matrix_a = np.array([[0, 1, 1, 0, 0], [1, 4, 0, 1, 0], [1, 1, 0, 0, 1]])
+    matrix_lb = np.array([-100, -100, -100]).transpose()
+    matrix_ub = np.array([7, 29, 11]).transpose()
+    matrix_ld = np.array([0, 0, 0, 0, 0]).transpose()
+    matrix_ud = np.array([100, 100, 100, 100, 100]).transpose()
 
     solution = solve_adaptive(matrix_c, matrix_a, matrix_lb, matrix_ub, matrix_ld, matrix_ud)
     print("solution is\n")
     print(solution)
-    print(matrix_c.transpose() @ solution)
     print(matrix_a @ solution)
-    print(matrix_lb)
-    print(matrix_ub)
+    print(matrix_c.transpose() @ solution)
+
+    # matrix_c = np.array([-1, -1, -1, -1, -1, -1, -1, -1, -1, -1,])
+    # matrix_c = matrix_c.transpose()
+    
+    # matrix_a = np.array([[0.05122510239, -0.0785930863, 0.1024886449, -0.1014611958, 0.05270966528, 0.05208317585, -0.2215331957, 0.5058842243, -0.9656126594, 1.754174755, ],
+    #                      [0.09281285026, -0.1455465708, 0.195032618, -0.2262270293, 0.1998878894, -0.03075050927, -0.3870405994, 1.108915758, -2.129797237, 3.181471988,],
+    #                      [0.1056268387, -0.1868267921, 0.278314929, -0.3421464972, 0.3126629425, -0.09920806516, -0.4186780639, 1.387792617, -2.907709477, 4.986782492, ],
+    #                      [0.002239931401, -0.02179522895, 0.03908560243, -0.05101718315, 0.07248127277, -0.1143556508, 0.1393765937, -0.07665132908, -0.03246616959, -0.4379510637,],
+    #                      [-0.01978755747, 0.00941389334, 0.03037143911, -0.1057756223, 0.1942489587, -0.2690003401, 0.3519698635, -0.4904998978, 0.5638793848, 0.2779376797, ],
+    #                      [-0.04085427791, 0.03016455026, 0.005159948216, -0.08393876944, 0.2345873246, -0.4705323305, 0.7441648037, -0.9279663192, 0.8707036225, -0.6129519725, ]])
+    # matrix_lb = np.array([0.001808905247, 0.01414121308, 0.01932218309, -0.01069983326, -0.006767646502, -0.003292886014, ]).transpose()
+    # matrix_lb -= 0.5
+    # matrix_ub = np.array([0.001808905247, 0.01414121308, 0.01932218309, -0.01069983326, -0.006767646502, -0.003292886014,]).transpose()
+    # matrix_ub += 0.5
+    # matrix_ld = np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0]).transpose()
+    # matrix_ud = np.array([10, 10, 10, 10, 10, 10, 10, 10, 10, 10]).transpose()
+
+    # solution = solve_adaptive(matrix_c, matrix_a, matrix_lb, matrix_ub, matrix_ld, matrix_ud)
+    # print("solution is\n")
+    # print(solution)
+    # print("origin solution:\n")
+    # x_or = np.array([6.96856, 10, 9.67614, 10, 9.77465, 10, 10, 6.31539, 1.9775, 0.198165])
+    # print(x_or)
+    # print(matrix_a @ x_or)
+    # print(matrix_c.transpose() @ solution)
+    # print(matrix_a @ solution)
+    # print(matrix_lb)
+    # print(matrix_ub)

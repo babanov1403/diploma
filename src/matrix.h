@@ -3,10 +3,11 @@
 #include <cmath>
 #include <iomanip>
 #include <iostream>
-#include <vector>
+#include <numeric>
 #include <set>
 #include <unordered_set>
-#include <numeric>
+#include <vector>
+#include <omp.h>
 
 #include "utils.h"
 
@@ -49,7 +50,7 @@ public:
     Matrix GetInversed() const;
     size_t GetRows() const;
     size_t GetColumns() const;
-    
+
     void UpdateMatrix(Matrix&&, const std::vector<int>&, const std::vector<int>&);
 
     Matrix GetSubMatrixByRow(const std::vector<int>&) const;

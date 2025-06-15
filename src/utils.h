@@ -1,10 +1,10 @@
 #pragma once
 
-#include <cmath>
-#include <unordered_set>
-#include <set>
-#include <vector>
 #include <algorithm>
+#include <cmath>
+#include <set>
+#include <unordered_set>
+#include <vector>
 
 constexpr double kTolerance = 1e-9;
 
